@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: ${SURVDEMO_DB_URL}
+    username: ${SURVDEMO_DB_USERNAME:}
+    password: ${SURVDEMO_DB_PASSWORD:}
+    hikari:
+      data-source-properties:
+        encrypt: true
+        trustServerCertificate: false
+        hostNameInCertificate: "*.database.windows.net"

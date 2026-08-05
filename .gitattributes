@@ -1,0 +1,4 @@
+* text=auto eol=lf
+
+# Preserve extracted mainframe evidence byte-for-byte.
+/legacy-source/** -text

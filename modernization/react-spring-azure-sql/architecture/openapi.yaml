@@ -1,0 +1,177 @@
+openapi: 3.1.0
+info:
+  title: SURVDEMO API
+  version: 1.0.0
+  description: API contract for the TASK-SURV-001 survivor entitlement inquiry slice.
+servers:
+  - url: /api/v1
+paths:
+  /survivor-entitlements/{claimId}/beneficiaries/{beneficiaryId}:
+    get:
+      operationId: inquireSurvivorEntitlement
+      summary: Inquire about one survivor entitlement
+      description: Replaces CICS transaction SI01 without exposing terminal or database structures.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: claimId
+          in: path
+          required: true
+          description: Fixed-width legacy claim identifier without padding.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 12
+            pattern: ^[^\s].*[^\s]$|^[^\s]$
+        - name: beneficiaryId
+          in: path
+          required: true
+          description: Fixed-width legacy beneficiary identifier without padding.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 10
+            pattern: ^[^\s].*[^\s]$|^[^\s]$
+      responses:
+        "200":
+          description: Entitlement found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SurvivorEntitlement"
+        "400":
+          $ref: "#/components/responses/ValidationProblem"
+        "401":
+          $ref: "#/components/responses/AuthenticationProblem"
+        "403":
+          $ref: "#/components/responses/AuthorizationProblem"
+        "404":
+          $ref: "#/components/responses/NotFoundProblem"
+        "503":
+          $ref: "#/components/responses/UnavailableProblem"
+        "500":
+          $ref: "#/components/responses/UnexpectedProblem"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    SurvivorEntitlement:
+      type: object
+      additionalProperties: false
+      required:
+        - claimId
+        - beneficiaryId
+        - beneficiaryName
+        - relationshipCode
+        - relationshipLabel
+        - monthlyAmount
+        - startDate
+        - displayStatus
+        - message
+      properties:
+        claimId:
+          type: string
+          maxLength: 12
+        beneficiaryId:
+          type: string
+          maxLength: 10
+        beneficiaryName:
+          type: string
+          maxLength: 60
+        relationshipCode:
+          type: string
+          maxLength: 3
+        relationshipLabel:
+          type: string
+          enum: [SPOUSE, CHILD, DEPENDENT, UNKNOWN]
+        monthlyAmount:
+          type: string
+          description: Exact scale-two decimal amount. Consumers must not parse it as binary floating point.
+          pattern: ^-?\d+\.\d{2}$
+          examples: ["1250.00"]
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: [string, "null"]
+          format: date
+        displayStatus:
+          type: string
+          enum: [NOT_APPROVED, INELIGIBLE, ACTIVE, SUSPENDED, ENDED, CANCELLED, UNKNOWN]
+        message:
+          type: string
+          enum:
+            - CLAIM IS NOT APPROVED
+            - BENEFICIARY IS NOT ELIGIBLE
+            - ENTITLEMENT FOUND
+            - ENTITLEMENT IS SUSPENDED
+            - ENTITLEMENT HAS ENDED
+            - ENTITLEMENT IS CANCELLED
+            - UNKNOWN ENTITLEMENT STATUS
+    Problem:
+      type: object
+      additionalProperties: false
+      required: [type, title, status, code, correlationId]
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        code:
+          type: string
+          enum:
+            - SURV-VALIDATION
+            - SURV-AUTHENTICATION-REQUIRED
+            - SURV-FORBIDDEN
+            - SURV-ENTITLEMENT-NOT-FOUND
+            - SURV-SERVICE-UNAVAILABLE
+            - SURV-UNEXPECTED
+        correlationId:
+          type: string
+  responses:
+    ValidationProblem:
+      description: Identifier syntax is invalid
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    AuthenticationProblem:
+      description: Authentication is required
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    AuthorizationProblem:
+      description: The authenticated actor cannot perform survivor inquiry
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    NotFoundProblem:
+      description: No entitlement exists for the supplied identifiers
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    UnavailableProblem:
+      description: The inquiry service cannot complete the request
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    UnexpectedProblem:
+      description: An unexpected error prevented the request from completing
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"

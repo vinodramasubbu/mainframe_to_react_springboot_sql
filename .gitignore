@@ -1,0 +1,26 @@
+# Local credentials and environment overrides
+**/.env
+**/.env.*
+!**/.env.example
+
+# Dependency and build output
+**/node_modules/
+/target/react-spring-azure-sql/backend/target/
+**/dist/
+**/coverage/
+**/test-results/
+**/playwright-report/
+**/.vite/
+
+# Logs and local tool state
+*.log
+*.pid
+.eslintcache
+.idea/
+.vscode/
+*.iml
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini

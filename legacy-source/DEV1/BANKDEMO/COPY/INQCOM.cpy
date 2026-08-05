@@ -1,0 +1,7 @@
+000100 01  INQUIRY-COMMAREA.
+000200     05  INQ-STATE                  PIC X(1).
+000300         88  INQ-FIRST-SEND         VALUE '0'.
+000400         88  INQ-WAITING-INPUT      VALUE '1'.
+000500     05  INQ-LAST-ACCOUNT-ID        PIC X(10).
+000600     05  INQ-USER-ID                PIC X(8).
+000700     05  INQ-RESERVED               PIC X(13).

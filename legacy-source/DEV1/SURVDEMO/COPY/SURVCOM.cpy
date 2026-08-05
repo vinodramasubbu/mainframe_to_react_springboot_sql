@@ -1,0 +1,8 @@
+000100 01  SURVIVOR-INQUIRY-COMMAREA.
+000200     05  SI-STATE                   PIC X.
+000300         88  SI-FIRST-SEND          VALUE 'F'.
+000400         88  SI-WAITING-INPUT       VALUE 'W'.
+000500     05  SI-USER-ID                 PIC X(8).
+000600     05  SI-LAST-CLAIM-ID           PIC X(12).
+000700     05  SI-LAST-BENEFICIARY-ID     PIC X(10).
+000800     05  FILLER                     PIC X.
