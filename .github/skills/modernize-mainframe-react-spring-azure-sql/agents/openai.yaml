@@ -1,4 +1,0 @@
-interface:
-  display_name: "Mainframe to React Spring Azure SQL"
-  short_description: "Modernize z/OS apps into a verified full stack"
-  default_prompt: "Use $modernize-mainframe-react-spring-azure-sql to convert one evidence-backed mainframe slice into React, Spring Boot, and Azure SQL with optional local SQL Server tests."
