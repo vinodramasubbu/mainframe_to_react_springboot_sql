@@ -1,6 +1,6 @@
 ---
 name: modernize-mainframe-application
-description: "Analyze enterprise z/OS applications and produce reconciled extraction, inventory, dependency, business-rule, data, transaction, and behavior-oracle evidence for handoff to the repository's fixed target: React, Spring Boot, and Azure SQL Database. Use for COBOL, PL/I, Assembler, JCL, copybook, CICS, Db2, IMS, VSAM, MQ, batch, USS, mainframe extraction, dependency discovery, business-rule recovery, and characterization where traceability and production accuracy are required. Do not generate target code."
+description: "Discover, characterize, and sequence enterprise z/OS modernization before target design. Use for mainframe extraction, reconciliation, inventory, dependency discovery, business-rule recovery, transaction analysis, behavior-oracle creation, slice ordering, phased roadmaps, and dependency DAGs across COBOL, PL/I, Assembler, JCL, copybooks, CICS, Db2, IMS, VSAM, MQ, batch, and USS. Produces an approved evidence handoff and executable phase plan only; do not use for target architecture, React, Spring Boot, Azure SQL design, implementation, validation, coexistence, or cutover."
 ---
 
 # Discover Mainframe Application
@@ -15,6 +15,7 @@ Recover behavior and prove it with executable evidence before implementation. Th
 - Do not equate compilation, generated unit tests, or superficial output similarity with functional parity.
 - Preserve externally observable behavior unless an approved requirement explicitly changes it.
 - Analyze one bounded context or candidate vertical slice at a time. Keep each evidence set reviewable and traceable.
+- Produce one persistent modernization roadmap and dependency DAG from recovered evidence. The roadmap sequences discovery, handoff, target design, implementation, validation, coexistence, and cutover gates without pre-deciding target details.
 - The downstream implementation target is fixed: React, Spring Boot, and Azure SQL Database. Hand off approved evidence to `modernize-mainframe-react-spring-azure-sql`.
 - Do not generate application code, target DDL, implementation architecture, or deployment assets from this discovery skill.
 - Stop and report a blocker when evidence is missing or conflicting. State the affected behavior, risk, and evidence needed to continue.
@@ -41,9 +42,10 @@ legacy-source/                 # immutable extraction
 modernization/
   inventory/                  # manifests and reconciliation
   analysis/                   # dependency graph and recovered rules
-  architecture/               # context, containers, ADRs, API/data contracts
-  plans/                      # slices, backlog, cutover and rollback
-  evidence/                   # parity, performance and security evidence
+  plan/                       # phased roadmap, DAG, and execution status
+  evidence/
+    characterization/         # approved legacy oracle cases and provenance
+  handoff/                    # approved slice evidence for target design
 target/
   react-spring-azure-sql/     # created only by the dedicated implementation skill
 ```
@@ -59,13 +61,13 @@ Never mix generated output into `legacy-source/`. Never commit credentials, prod
 3. Record the source-of-truth system and exact revision/date.
 4. Confirm that downstream implementation will use React, Spring Boot, and Azure SQL Database.
 5. Define approval gates and evidence required for each gate.
-6. Create the initial deliverables using [deliverables.md](references/deliverables.md).
+6. Create the initial deliverables using [deliverables.md](./references/deliverables.md).
 
 Do not begin target implementation from this skill. Complete the evidence boundary and hand off to the dedicated implementation skill.
 
 ### 2. Baseline and reconcile the extraction
 
-1. Read [zowe-extraction.md](references/zowe-extraction.md).
+1. Read [zowe-extraction.md](./references/zowe-extraction.md).
 2. Preserve dataset qualifiers, PDS/PDSE member names, USS paths, source-management version identifiers, DSORG, RECFM, LRECL, encoding/CCSID, and transfer mode.
 3. Run the inventory tool:
 
@@ -81,7 +83,7 @@ Gate: extraction coverage is reconciled, encodings are known, and all missing ar
 
 ### 3. Recover the system model
 
-Read [legacy-analysis.md](references/legacy-analysis.md), then:
+Read [legacy-analysis.md](./references/legacy-analysis.md), then:
 
 1. Identify entry points: CICS transactions, screens, APIs, MQ consumers, files, JCL jobs, scheduler events, utilities, and operator actions.
 2. Resolve all copybooks, includes, macros, procedures, bind plans, maps, schemas, and generated sources.
@@ -93,7 +95,19 @@ Read [legacy-analysis.md](references/legacy-analysis.md), then:
 
 Gate: every in-scope entry point, rule, and external effect is mapped or explicitly recorded as an unresolved risk.
 
-### 4. Create a behavior oracle
+### 4. Create the modernization roadmap and phase DAG
+
+1. Group entry points and dependencies into the smallest useful vertical slices.
+2. Order slices using business value, dependency direction, evidence readiness, risk, coexistence constraints, and oracle availability.
+3. Create `modernization/plan/modernization-roadmap.md` with phases, slices, gates, owners, expected outputs, and completion criteria.
+4. Create `modernization/plan/phase-dag.json` using stable node IDs and explicit dependencies. Use milestone nodes for coarse target phases, executable work nodes for known discovery tasks, and explicit approval nodes for human decisions. Include discovery, handoff, approval, target design, implementation, validation, coexistence, rollback, cutover, and decommission phases where applicable.
+5. Create `modernization/plan/status.md` as the authoritative transition ledger. Initialize the first executable node whose dependencies and readiness criteria are satisfied as `ready`; leave successors `planned`. Cache the same current statuses in the DAG.
+6. Mark unknown dependencies and missing evidence as blocked work nodes. Represent owner decisions as explicit approval nodes. Never hide uncertainty by forcing a total order.
+7. Review slice boundaries and sequencing with business, mainframe, data, security, operations, and target-platform owners.
+
+Gate: the roadmap covers every in-scope entry point, its ordering is evidence-backed, and owners accept the proposed slice sequence and approval gates.
+
+### 5. Create a behavior oracle
 
 1. Derive test scenarios from recovered rules and production-like operational cases.
 2. Capture sanitized legacy inputs, outputs, database changes, messages, files, return codes, logs, and timing.
@@ -103,12 +117,13 @@ Gate: every in-scope entry point, rule, and external effect is mapped or explici
 
 Gate: the initial slice has an executable oracle and approved acceptance tolerances.
 
-### 5. Hand off an approved slice
+### 6. Hand off an approved slice
 
 1. Select the smallest useful candidate slice with representative behavior and an approved oracle.
-2. Package its entry points, artifacts, rule IDs, interfaces, data definitions, transaction behavior, risks, and test cases.
-3. Record missing or conflicting evidence and stop affected behavior.
-4. Invoke `modernize-mainframe-react-spring-azure-sql` for architecture, contracts, implementation, database migration, validation, coexistence, and cutover.
+2. Package its entry points, artifacts, rule IDs, interfaces, data definitions, transaction behavior, risks, test cases, tolerances, and owner approvals under `modernization/handoff/`.
+3. Link the handoff to its DAG node and update the execution ledger with actual evidence and approval status.
+4. Record missing or conflicting evidence, mark affected nodes blocked, and stop affected behavior.
+5. Invoke `modernize-mainframe-react-spring-azure-sql` for the next approved target node. The implementation skill refines that slice's target nodes and continues the same DAG rather than creating a disconnected workflow.
 
 Gate: accountable owners approve the discovery model, candidate slice, oracle, tolerances, and unresolved risks before implementation begins.
 
@@ -137,13 +152,13 @@ At the end of each task, report:
 4. Tests and validation actually run, with results.
 5. Parity mismatches and unresolved assumptions.
 6. Risks, decisions, and approvals required.
-7. The next smallest evidence or implementation handoff.
+7. Roadmap revision, current DAG node/status, and next unblocked node.
 
 Do not use "production ready," "equivalent," "complete," or "fully migrated" without linking to the required evidence.
 
 ## Resource routing
 
-- Read [zowe-extraction.md](references/zowe-extraction.md) for extraction, transfer, encoding, and reconciliation work.
-- Read [legacy-analysis.md](references/legacy-analysis.md) for COBOL/JCL/CICS/Db2/IMS/VSAM/MQ analysis and rule recovery.
+- Read [zowe-extraction.md](./references/zowe-extraction.md) for extraction, transfer, encoding, and reconciliation work.
+- Read [legacy-analysis.md](./references/legacy-analysis.md) for COBOL/JCL/CICS/Db2/IMS/VSAM/MQ analysis and rule recovery.
 - Hand approved evidence to `modernize-mainframe-react-spring-azure-sql` before target architecture, Azure SQL schema design, implementation, readiness validation, or cutover.
-- Read [deliverables.md](references/deliverables.md) when creating or updating modernization artifacts.
+- Read [deliverables.md](./references/deliverables.md) when creating or updating discovery artifacts.

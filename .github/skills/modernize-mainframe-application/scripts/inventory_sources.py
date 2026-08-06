@@ -18,11 +18,9 @@ DEFAULT_EXCLUDED_DIRS = {
     ".git",
     ".idea",
     ".vscode",
-    "__pycache__",
-    "bin",
-    "node_modules",
-    "obj",
 }
+
+FILE_ATTRIBUTE_REPARSE_POINT = 0x400
 
 CATEGORIES = {
     ".asm": "assembler",
@@ -87,6 +85,17 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def sha256_text(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8", errors="surrogateescape")).hexdigest()
+
+
+def is_link_like(path: Path) -> bool:
+    if path.is_symlink():
+        return True
+    attributes = getattr(path.lstat(), "st_file_attributes", 0)
+    return bool(attributes & FILE_ATTRIBUTE_REPARSE_POINT)
+
+
 def inspect_text(path: Path) -> tuple[bool, str | None, int | None]:
     sample = path.read_bytes()[:65536]
     if b"\x00" in sample:
@@ -116,16 +125,42 @@ def iter_files(
 ) -> list[Path]:
     result: list[Path] = []
     for current_root, dirs, files in os.walk(root):
-        dirs[:] = sorted(name for name in dirs if name not in excluded_dirs)
         current = Path(current_root)
+        traversable_dirs: list[str] = []
+        for name in sorted(dirs):
+            if name in excluded_dirs:
+                continue
+            path = current / name
+            if is_link_like(path):
+                if path not in excluded_paths:
+                    result.append(path)
+            else:
+                traversable_dirs.append(name)
+        dirs[:] = traversable_dirs
         for name in sorted(files):
-            path = (current / name).resolve()
+            path = current / name
             if path not in excluded_paths:
                 result.append(path)
     return sorted(result, key=lambda item: item.relative_to(root).as_posix())
 
 
 def build_record(root: Path, path: Path, large_file_bytes: int) -> dict[str, Any]:
+    if is_link_like(path):
+        target = os.readlink(path)
+        return {
+            "relative_path": path.relative_to(root).as_posix(),
+            "entry_type": "symbolic-link",
+            "symlink_target": target,
+            "size_bytes": path.lstat().st_size,
+            "sha256": sha256_text(target),
+            "extension": path.suffix.lower(),
+            "category": "symbolic-link",
+            "binary_or_undecoded": False,
+            "detected_local_encoding": None,
+            "line_count": None,
+            "flags": ["symbolic-link"],
+        }
+
     stat = path.stat()
     binary, encoding, line_count = inspect_text(path)
     flags: list[str] = []
@@ -140,6 +175,8 @@ def build_record(root: Path, path: Path, large_file_bytes: int) -> dict[str, Any
 
     return {
         "relative_path": path.relative_to(root).as_posix(),
+        "entry_type": "file",
+        "symlink_target": None,
         "size_bytes": stat.st_size,
         "sha256": sha256_file(path),
         "extension": path.suffix.lower(),
@@ -160,7 +197,7 @@ def write_json(
     categories = Counter(record["category"] for record in records)
     flags = Counter(flag for record in records for flag in record["flags"])
     payload = {
-        "schema_version": 1,
+        "schema_version": 2,
         "inventory_root": str(root),
         "file_count": len(records),
         "total_bytes": sum(record["size_bytes"] for record in records),
@@ -180,6 +217,8 @@ def write_csv(output: Path, records: list[dict[str, Any]]) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = [
         "relative_path",
+        "entry_type",
+        "symlink_target",
         "size_bytes",
         "sha256",
         "extension",

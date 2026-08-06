@@ -1,4 +1,5 @@
 ---
+description: "Use when creating, running, or reviewing full-stack end-to-end, accessibility, characterization, differential parity, failure, rollback, or restart tests."
 applyTo: "target/react-spring-azure-sql/tests/e2e/**"
 ---
 

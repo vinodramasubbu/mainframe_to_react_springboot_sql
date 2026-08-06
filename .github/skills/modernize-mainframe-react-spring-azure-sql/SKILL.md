@@ -1,6 +1,6 @@
 ---
 name: modernize-mainframe-react-spring-azure-sql
-description: Convert an evidence-backed z/OS application slice into a verified three-tier full-stack system with a React and TypeScript frontend, Spring Boot backend, and Azure SQL Database persistence, including local SQL Server development and integration testing. Use for COBOL, CICS, BMS/MFS screens, JCL/batch, Db2, VSAM, IMS, MQ, fixed files, business-rule recovery, UI workflow redesign, OpenAPI contracts, Java implementation, Azure SQL schema migration, Testcontainers or local SQL testing, end-to-end parity, coexistence, or cutover when the React-Spring-Azure-SQL stack has been selected.
+description: "Continue an approved, evidence-backed mainframe roadmap and phase DAG using React with TypeScript, Spring Boot, and Azure SQL Database. Use after discovery approval to refine and execute target architecture, UI workflow design, OpenAPI contracts, Java domain and application code, Azure SQL schema migrations, local SQL Server integration testing, full-stack validation, parity, coexistence, rollback, and cutover nodes. Do not use for initial extraction, inventory, dependency discovery, roadmap creation, or unapproved rule recovery."
 ---
 
 # Modernize Mainframe to React, Spring Boot, and Azure SQL
@@ -20,12 +20,15 @@ Convert business capabilities, not source files or 3270 screens in isolation. Re
 - Never invent missing copybooks, map definitions, schemas, code mappings, transaction boundaries, navigation behavior, failure behavior, or external contracts.
 - Require a stable rule or interface ID, legacy evidence citation, target mapping, and test for every recovered behavior.
 - Implement one reviewable vertical slice at a time. Keep database, API, frontend, deployment, and rollback changes traceable to that slice.
+- Continue the discovery-created roadmap and DAG. Refine approved target nodes in place, preserve completed/superseded history, and never create a disconnected implementation plan.
 - Stop the affected work when evidence is missing or conflicting. Record the gap, impact, owner, and evidence needed.
 
 ## Required inputs
 
 Locate or obtain:
 
+- An approved discovery handoff under `modernization/handoff/` for the bounded slice.
+- The current `modernization/plan/modernization-roadmap.md`, `phase-dag.json`, and `status.md`, with the handoff's predecessor nodes completed and its target-design node eligible to become `ready`.
 - Business, UX, mainframe, data, security, accessibility, operations, and target-platform owners.
 - In-scope transactions, screens, jobs, interfaces, datasets, tables, queues, and scheduler events.
 - Reconciled extraction manifests, source revisions, encodings, record formats, and exclusions.
@@ -54,65 +57,44 @@ target/react-spring-azure-sql/
   tests/e2e/
 ```
 
+The cross-phase roadmap remains under `modernization/plan/`. Detailed target work packets live under `modernization/react-spring-azure-sql/plans/` and must reference and refine their parent DAG node.
+
 Use `modernization/evidence/characterization/` as the approved legacy oracle when it already exists. Never copy generated target code into `legacy-source/`.
 
-Read [deliverables.md](references/deliverables.md) before creating artifacts.
+Read [deliverables.md](./references/deliverables.md) and the canonical roadmap/DAG/ledger contract in [the discovery deliverables reference](../modernize-mainframe-application/references/deliverables.md) before creating artifacts or evaluating state.
 
 ## Workflow
 
-### 1. Reconcile the source boundary
+### 1. Validate the approved evidence handoff
 
-1. Confirm the application, environment, revision, owners, entry points, and exclusions.
-2. Reconcile source-manager elements, datasets/members, USS files, external definitions, and extracted files.
-3. Preserve dataset/member identity, DSORG, RECFM, LRECL, CCSID, transfer mode, fixed columns, and hashes.
-4. Use the sibling inventory script when a deterministic inventory is needed:
+1. Confirm the handoff names the application, environment, source revision, owners, bounded entry points, and exclusions.
+2. Read `phase-dag.json` and `status.md`, validate and replay canonical ledger records in sequence order, reconcile the cached statuses against the derived state, and stop as blocked on any malformed record, conflict, or mismatch before evaluating readiness.
+3. Locate its DAG approval node; verify all predecessors are `completed`, its structured approval record matches every canonical approval field and the source, handoff, scope, and roadmap revisions, and the design milestone is the next eligible phase.
+4. Verify extraction reconciliation, encoding, dependency, rule, interface, data, transaction, restart, failure, and external-effect evidence is cited and approved.
+5. Verify the executable oracle covers representative, boundary, invalid, duplicate, unauthorized, concurrency, failure, restart, and retry scenarios with approved normalization and tolerances.
+6. Read [legacy-ui-recovery.md](./references/legacy-ui-recovery.md) only to map approved terminal evidence into target user tasks; do not reopen broad legacy discovery.
+7. Stop affected target work and return the gap to `modernize-mainframe-application` when evidence is missing, conflicting, or unapproved. Record the relevant node as `blocked`; do not start or transition a target work node before this validation passes.
 
-   ```text
-   python .github/skills/modernize-mainframe-application/scripts/inventory_sources.py legacy-source --output modernization/inventory/artifact-inventory.json --csv modernization/inventory/artifact-inventory.csv
-   ```
+Gate: the bounded handoff is approved and every in-scope behavior is evidenced or explicitly blocked.
 
-5. Resolve every missing, unreadable, empty, binary, duplicated, incorrectly decoded, or excluded artifact.
+### 2. Approve the full-stack design
 
-Gate: extraction coverage and encodings are reconciled and accountable owners accept exclusions.
+1. Write and approve the slice expansion manifest, then expand its stable target milestones with reviewable design, contract, domain, database, API, frontend, integration, parity, rollback, and cutover child nodes. Follow the canonical `<milestone-id>.<stage>.<outcomeKey>` ID rule, manifest canonicalization and digest, explicit edges, duplicate detection, conflict blocking, `parentId`, separate readiness/completion criteria, and explicit approval nodes. Do not execute milestones, replace their IDs, rewire unrelated branches, rename executed nodes, or delete prior history.
+2. Select the first `ready` design work node, append its `in-progress` transition to the ledger, then update its cached status.
+3. Record an ADR accepting React, Spring Boot, and Azure SQL Database for the target slice.
+4. Define presentation, application/domain, and data/integration tier responsibilities.
+5. Map legacy user tasks to React routes, pages, forms, actions, states, and accessibility behavior.
+6. Define OpenAPI contracts, error contracts, authentication/authorization, idempotency, concurrency, versioning, and correlation.
+7. Decide SPA-with-API versus backend-for-frontend using the threat model and identity requirements.
+8. Define Azure SQL ownership, schema, data migration, transaction strategy, coexistence, reconciliation, and recovery.
+9. Prefer a modular monolith unless independent deployment or scaling is justified.
+10. Map every target component and contract to legacy rule and test IDs.
 
-### 2. Recover system and user behavior
-
-1. Inventory all interactive, batch, message, file, API, operator, and scheduled entry points.
-2. Resolve copybooks, includes, maps, transactions, dynamic calls, procedures, control cards, schemas, packages, and generated sources.
-3. Build a dependency graph across programs, screens, COMMAREAs, jobs, datasets, tables, queues, and external systems.
-4. Recover business rules, state transitions, authorization, validation, calculations, commits, rollback, restart, ordering, return codes, and failures.
-5. Read [legacy-ui-recovery.md](references/legacy-ui-recovery.md) and recover screen flow, field behavior, PF/AID actions, pseudo-conversation, messages, focus, and task outcomes.
-6. Separate business behavior from terminal-specific presentation behavior.
-7. Review the recovered model with business and mainframe SMEs.
-
-Gate: each in-scope entry point, user action, rule, data effect, and external effect is mapped or recorded as an unresolved risk.
-
-### 3. Create the behavior oracle
-
-1. Capture sanitized legacy inputs and approved observable outcomes.
-2. Include screen/task results, field and message behavior, database post-state, files, messages, return codes, audit effects, and ordering.
-3. Cover representative, boundary, invalid, empty, maximum-length, duplicate, unauthorized, concurrency, failure, restart, and retry scenarios.
-4. Normalize only approved nondeterministic values such as timestamps and trace identifiers.
-5. Record intentional UX changes separately from required business parity.
-
-Gate: the first slice has an executable oracle and approved tolerances.
-
-### 4. Approve the full-stack design
-
-1. Record an ADR accepting React, Spring Boot, and Azure SQL Database for the target slice.
-2. Define presentation, application/domain, and data/integration tier responsibilities.
-3. Map legacy user tasks to React routes, pages, forms, actions, states, and accessibility behavior.
-4. Define OpenAPI contracts, error contracts, authentication/authorization, idempotency, concurrency, versioning, and correlation.
-5. Decide SPA-with-API versus backend-for-frontend using the threat model and identity requirements.
-6. Define Azure SQL ownership, schema, data migration, transaction strategy, coexistence, reconciliation, and recovery.
-7. Prefer a modular monolith unless independent deployment or scaling is justified.
-8. Map every target component and contract to legacy rule and test IDs.
-
-Read [react-frontend.md](references/react-frontend.md) and [spring-azure-sql.md](references/spring-azure-sql.md).
+Read [target-architecture.md](./references/target-architecture.md), [react-frontend.md](./references/react-frontend.md), [spring-azure-sql.md](./references/spring-azure-sql.md), and [azure-sql.md](./references/azure-sql.md).
 
 Gate: workflow, contracts, threat model, data design, deployment, migration, rollback, and operational model are approved.
 
-### 5. Design contracts and data before implementation
+### 3. Design contracts and data before implementation
 
 1. Create screen/task-to-route and legacy-field-to-UI mappings.
 2. Create the OpenAPI contract before implementing frontend and backend independently.
@@ -124,11 +106,11 @@ Gate: workflow, contracts, threat model, data design, deployment, migration, rol
 
 Gate: UI, API, error, security, and database contracts are reviewable, traceable, and approved.
 
-### 6. Implement one vertical slice
+### 4. Implement one vertical slice
 
 For each work packet:
 
-1. List in-scope legacy artifacts, entry points, rules, interfaces, data, oracle cases, and intentional changes.
+1. Select the next `ready` executable DAG node, append its `in-progress` transition to the ledger, update its cached status, and list its in-scope legacy artifacts, entry points, rules, interfaces, data, oracle cases, and intentional changes.
 2. Add or refine characterization and contract tests first.
 3. Implement Spring domain types and rules without Spring, HTTP, ORM, or Azure SDK dependencies.
 4. Implement application orchestration, authorization policies, idempotency, and explicit transactions.
@@ -137,10 +119,11 @@ For each work packet:
 7. Generate or validate TypeScript API types from the approved contract.
 8. Implement the accessible React workflow without duplicating authoritative business rules.
 9. Add unit, component, integration, contract, accessibility, end-to-end, security, concurrency, performance, and parity tests.
-10. Read [local-sql-testing.md](references/local-sql-testing.md) and run database integration tests against a clean local SQL Server where supported.
+10. Read [local-sql-testing.md](./references/local-sql-testing.md) and run database integration tests against a clean local SQL Server where supported.
 11. Apply the complete database migration chain to an empty approved test database.
 12. Run the smallest relevant checks, then the full required suite.
 13. Update traceability, risks, ADRs, runbooks, reconciliation, and rollback in the same work packet.
+14. Record commands and actual results, mark the node `completed` only when its completion criteria pass, derive parent milestone status, then promote executable nodes whose dependencies and readiness criteria are satisfied to `ready`. Leave pending human decisions as ready approval nodes; mark evidence failures blocked rather than skipping them.
 
 Do not combine unrelated screens, batch paths, database redesigns, interface replacements, or infrastructure changes.
 
@@ -155,9 +138,9 @@ When a legacy program group (for example an online inquiry, its validator, and a
 - Make every unexpected-exception handler log the cause and correlation id. A handler that swallows the cause turns a one-line schema or constraint error into repeated rebuild-and-probe cycles.
 - Verify readiness and parity through the real endpoint that also touches the database, then diff persisted rows against the approved post-state fixtures; a passing unit test plus a green port check is not database parity.
 
-### 7. Verify the integrated slice
+### 5. Verify the integrated slice
 
-Read [full-stack-verification.md](references/full-stack-verification.md).
+Read [full-stack-verification.md](./references/full-stack-verification.md) and [production-readiness.md](./references/production-readiness.md).
 
 Require:
 
@@ -173,7 +156,7 @@ Require:
 
 Never call the slice equivalent or production-ready while critical mismatches or missing approvals remain.
 
-### 8. Cut over incrementally
+### 6. Cut over incrementally
 
 1. Select strangler routing, parallel run, coexistence, CDC, shadowing, or batch cutover by interface and consistency needs.
 2. Rehearse deployment, data migration, database recovery, restart, reconciliation, frontend rollback, API rollback, and legacy fallback.
@@ -205,13 +188,16 @@ At the end of each task, report:
 4. Commands and tests actually run with results.
 5. UI, API, business, database, and operational parity mismatches.
 6. Risks, assumptions, decisions, and approvals required.
-7. Rollback status and the next smallest safe work packet.
+7. Roadmap revision, DAG node/status transition, rollback status, and next unblocked node.
 
 ## Resource routing
 
-- Read [legacy-ui-recovery.md](references/legacy-ui-recovery.md) before translating CICS/BMS, IMS/MFS, 3270, or terminal workflows.
-- Read [react-frontend.md](references/react-frontend.md) before designing or implementing React, TypeScript, browser security, accessibility, or frontend tests.
-- Read [spring-azure-sql.md](references/spring-azure-sql.md) before implementing Spring Boot, OpenAPI, transactions, batch, persistence, migrations, or Azure SQL.
-- Read [local-sql-testing.md](references/local-sql-testing.md) before configuring Testcontainers, Docker Compose, local SQL Server profiles, local credentials, database reset, or local integration tests.
-- Read [full-stack-verification.md](references/full-stack-verification.md) before planning parity, accessibility, security, performance, readiness, or cutover evidence.
-- Read [deliverables.md](references/deliverables.md) before creating analysis, architecture, plan, target, or evidence artifacts.
+- Read [legacy-ui-recovery.md](./references/legacy-ui-recovery.md) before translating CICS/BMS, IMS/MFS, 3270, or terminal workflows.
+- Read [target-architecture.md](./references/target-architecture.md) before defining tier, module, deployment, security, integration, or coexistence boundaries.
+- Read [react-frontend.md](./references/react-frontend.md) before designing or implementing React, TypeScript, browser security, accessibility, or frontend tests.
+- Read [spring-azure-sql.md](./references/spring-azure-sql.md) before implementing Spring Boot, OpenAPI, transactions, batch, persistence, migrations, or Azure SQL.
+- Read [azure-sql.md](./references/azure-sql.md) before approving source-to-target maps, physical schema, migrations, type mappings, collation, isolation, or database readiness.
+- Read [local-sql-testing.md](./references/local-sql-testing.md) before configuring Testcontainers, Docker Compose, local SQL Server profiles, local credentials, database reset, or local integration tests.
+- Read [full-stack-verification.md](./references/full-stack-verification.md) before planning parity, accessibility, security, performance, readiness, or cutover evidence.
+- Read [production-readiness.md](./references/production-readiness.md) before production-readiness, differential-parity, nonfunctional, or cutover approval.
+- Read [deliverables.md](./references/deliverables.md) before creating analysis, architecture, plan, target, or evidence artifacts.
