@@ -51,7 +51,7 @@ public class SecurityConfig {
             @Value("${survdemo.security.allowed-origin}") String allowedOrigin) {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(allowedOrigin));
-        configuration.setAllowedMethods(List.of("GET", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", CorrelationIdFilter.HEADER));
         configuration.setExposedHeaders(List.of(CorrelationIdFilter.HEADER));
         configuration.setAllowCredentials(false);

@@ -2,10 +2,40 @@ openapi: 3.1.0
 info:
   title: SURVDEMO API
   version: 1.0.0
-  description: API contract for the TASK-SURV-001 survivor entitlement inquiry slice.
+  description: API contract for survivor entitlement inquiry and on-demand monthly benefit runs.
 servers:
   - url: /api/v1
 paths:
+  /monthly-benefit-runs:
+    post:
+      operationId: runMonthlyBenefits
+      summary: Run the monthly survivor benefit calculation on demand
+      description: Executes the authoritative monthly calculation synchronously and returns its outcome and staged results.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MonthlyBenefitRunRequest"
+      responses:
+        "200":
+          description: Run completed with clean, business-exception, or technical-failure outcome
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonthlyBenefitRun"
+        "400":
+          $ref: "#/components/responses/BatchValidationProblem"
+        "401":
+          $ref: "#/components/responses/AuthenticationProblem"
+        "403":
+          $ref: "#/components/responses/BatchAuthorizationProblem"
+        "503":
+          $ref: "#/components/responses/UnavailableProblem"
+        "500":
+          $ref: "#/components/responses/UnexpectedProblem"
   /survivor-entitlements/{claimId}/beneficiaries/{beneficiaryId}:
     get:
       operationId: inquireSurvivorEntitlement
@@ -58,6 +88,123 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    MonthlyBenefitRunRequest:
+      type: object
+      additionalProperties: false
+      required: [runId, calculationDate]
+      properties:
+        runId:
+          type: string
+          minLength: 12
+          maxLength: 12
+          pattern: ^\S{12}$
+          description: Unique fixed-width run identifier. A failed run must be retried with a new identifier.
+        calculationDate:
+          type: string
+          format: date
+    MonthlyBenefitRun:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - calculationDate
+        - benefitMonth
+        - returnCode
+        - outcome
+        - paymentCount
+        - paymentTotal
+        - exceptionCount
+        - payments
+        - exceptions
+      properties:
+        runId:
+          type: string
+        calculationDate:
+          type: string
+          format: date
+        benefitMonth:
+          type: string
+          format: date
+        returnCode:
+          type: integer
+          enum: [0, 4, 12]
+        outcome:
+          type: string
+          enum: [CLEAN, COMPLETED_WITH_EXCEPTIONS, TECHNICAL_FAILURE]
+        paymentCount:
+          type: integer
+          minimum: 0
+        paymentTotal:
+          type: string
+          description: Exact scale-two decimal amount.
+          pattern: ^-?\d+\.\d{2}$
+        exceptionCount:
+          type: integer
+          minimum: 0
+        payments:
+          type: array
+          items:
+            $ref: "#/components/schemas/MonthlyBenefitPayment"
+        exceptions:
+          type: array
+          items:
+            $ref: "#/components/schemas/MonthlyBenefitException"
+    MonthlyBenefitPayment:
+      type: object
+      additionalProperties: false
+      required:
+        - paymentId
+        - claimId
+        - beneficiaryId
+        - beneficiaryName
+        - relationshipCode
+        - benefitMonth
+        - grossAmount
+        - offsetAmount
+        - netAmount
+        - status
+      properties:
+        paymentId:
+          type: string
+        claimId:
+          type: string
+        beneficiaryId:
+          type: string
+        beneficiaryName:
+          type: string
+        relationshipCode:
+          type: string
+        benefitMonth:
+          type: string
+          format: date
+        grossAmount:
+          type: string
+          pattern: ^-?\d+\.\d{2}$
+        offsetAmount:
+          type: string
+          pattern: ^-?\d+\.\d{2}$
+        netAmount:
+          type: string
+          pattern: ^-?\d+\.\d{2}$
+        status:
+          type: string
+    MonthlyBenefitException:
+      type: object
+      additionalProperties: false
+      required: [claimId, beneficiaryId, reasonCode, grossAmount, netAmount]
+      properties:
+        claimId:
+          type: string
+        beneficiaryId:
+          type: string
+        reasonCode:
+          type: string
+        grossAmount:
+          type: string
+          pattern: ^-?\d+\.\d{2}$
+        netAmount:
+          type: string
+          pattern: ^-?\d+\.\d{2}$
     SurvivorEntitlement:
       type: object
       additionalProperties: false
@@ -134,11 +281,18 @@ components:
             - SURV-AUTHENTICATION-REQUIRED
             - SURV-FORBIDDEN
             - SURV-ENTITLEMENT-NOT-FOUND
+            - SURV-BATCH-VALIDATION
             - SURV-SERVICE-UNAVAILABLE
             - SURV-UNEXPECTED
         correlationId:
           type: string
   responses:
+    BatchValidationProblem:
+      description: Monthly run syntax is invalid
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
     ValidationProblem:
       description: Identifier syntax is invalid
       content:
@@ -171,6 +325,12 @@ components:
             $ref: "#/components/schemas/Problem"
     UnexpectedProblem:
       description: An unexpected error prevented the request from completing
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    BatchAuthorizationProblem:
+      description: The authenticated actor cannot run monthly survivor benefits
       content:
         application/problem+json:
           schema:

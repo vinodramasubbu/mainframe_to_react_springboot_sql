@@ -53,6 +53,7 @@ SURVVALID is the only explicit dynamic program call in the extracted application
 | RULE-SURV-014 | Inquiry status/message priority is claim, beneficiary, then entitlement | Claim not approved overrides beneficiary and entitlement status; beneficiary ineligible overrides entitlement status | `COBOL/SURVINQ.cbl` 013300-015500 |
 | RULE-SURV-015 | Batch completion severity is encoded in return code | 0 clean, 4 business exceptions, 12 technical failure; scheduler treats 8 or higher as stop | `COBOL/SURVCALC.cbl` 000500-000600 and 044800-053000; `SCHED/SURVFLOW.txt` |
 | RULE-SURV-016 | Run creation is committed separately from calculation work | Technical failure rolls back work, marks the run F, and commits failure status | `COBOL/SURVCALC.cbl` 024300-025800 and 018800-019700 |
+| RULE-SURV-017 | Payment report preparation retains only detail records and sorts ascending by claim ID then beneficiary ID | Equal sort keys retain source order; the report step runs only when the preceding step return code is below 8 | `CNTL/PAYSORT.ctl`; `JCL/SURVMON.jcl` PAYRPT step |
 
 Validation is first-failure-wins in the order shown. C1, O1, A1, and unknown validation reasons use the generic exception text `ENTITLEMENT VALIDATION FAILED`; B1, R1, P1, D1, F1, and Z1 have specific text.
 

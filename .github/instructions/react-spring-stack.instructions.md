@@ -13,5 +13,6 @@ applyTo: "target/react-spring-azure-sql/**,modernization/react-spring-azure-sql/
 - Use exact decimal strings at the JSON boundary where needed to prevent JavaScript precision loss. Use `BigDecimal` in Java and exact `decimal(p,s)` in Azure SQL.
 - Preserve approved null/blank, date/time, ordering, concurrency, transaction, restart, failure, audit, and external-side-effect behavior.
 - Keep every change traceable from legacy evidence through target component and test result.
+- Ensure `target/react-spring-azure-sql/README.md` exists, and update it in the same change whenever target functionality, prerequisites, environment variables, ports, startup steps, migrations, seed data, API or security behavior, tests, limitations, or cleanup commands are added or changed. Keep its commands executable, distinguish sample/local evidence from Azure validation, and never include secrets.
 - Run relevant build, static analysis, unit, component, contract, integration, accessibility, security, end-to-end, parity, migration, and performance checks. Report actual results.
 - Never claim equivalence or readiness while critical mismatches, missing dependencies, unapproved assumptions, or failed gates remain.

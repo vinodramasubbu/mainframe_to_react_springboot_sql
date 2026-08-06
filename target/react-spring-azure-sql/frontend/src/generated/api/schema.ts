@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/monthly-benefit-runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run the monthly survivor benefit calculation on demand
+         * @description Executes the authoritative monthly calculation synchronously and returns its outcome and staged results.
+         */
+        post: operations["runMonthlyBenefits"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/survivor-entitlements/{claimId}/beneficiaries/{beneficiaryId}": {
         parameters: {
             query?: never;
@@ -28,6 +48,49 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        MonthlyBenefitRunRequest: {
+            /** @description Unique fixed-width run identifier. A failed run must be retried with a new identifier. */
+            runId: string;
+            /** Format: date */
+            calculationDate: string;
+        };
+        MonthlyBenefitRun: {
+            runId: string;
+            /** Format: date */
+            calculationDate: string;
+            /** Format: date */
+            benefitMonth: string;
+            /** @enum {integer} */
+            returnCode: 0 | 4 | 12;
+            /** @enum {string} */
+            outcome: "CLEAN" | "COMPLETED_WITH_EXCEPTIONS" | "TECHNICAL_FAILURE";
+            paymentCount: number;
+            /** @description Exact scale-two decimal amount. */
+            paymentTotal: string;
+            exceptionCount: number;
+            payments: components["schemas"]["MonthlyBenefitPayment"][];
+            exceptions: components["schemas"]["MonthlyBenefitException"][];
+        };
+        MonthlyBenefitPayment: {
+            paymentId: string;
+            claimId: string;
+            beneficiaryId: string;
+            beneficiaryName: string;
+            relationshipCode: string;
+            /** Format: date */
+            benefitMonth: string;
+            grossAmount: string;
+            offsetAmount: string;
+            netAmount: string;
+            status: string;
+        };
+        MonthlyBenefitException: {
+            claimId: string;
+            beneficiaryId: string;
+            reasonCode: string;
+            grossAmount: string;
+            netAmount: string;
+        };
         SurvivorEntitlement: {
             claimId: string;
             beneficiaryId: string;
@@ -56,11 +119,20 @@ export interface components {
             status: number;
             detail?: string;
             /** @enum {string} */
-            code: "SURV-VALIDATION" | "SURV-AUTHENTICATION-REQUIRED" | "SURV-FORBIDDEN" | "SURV-ENTITLEMENT-NOT-FOUND" | "SURV-SERVICE-UNAVAILABLE" | "SURV-UNEXPECTED";
+            code: "SURV-VALIDATION" | "SURV-AUTHENTICATION-REQUIRED" | "SURV-FORBIDDEN" | "SURV-ENTITLEMENT-NOT-FOUND" | "SURV-BATCH-VALIDATION" | "SURV-SERVICE-UNAVAILABLE" | "SURV-UNEXPECTED";
             correlationId: string;
         };
     };
     responses: {
+        /** @description Monthly run syntax is invalid */
+        BatchValidationProblem: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
         /** @description Identifier syntax is invalid */
         ValidationProblem: {
             headers: {
@@ -115,6 +187,15 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
+        /** @description The authenticated actor cannot run monthly survivor benefits */
+        BatchAuthorizationProblem: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
     };
     parameters: never;
     requestBodies: never;
@@ -123,6 +204,35 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    runMonthlyBenefits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MonthlyBenefitRunRequest"];
+            };
+        };
+        responses: {
+            /** @description Run completed with clean, business-exception, or technical-failure outcome */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MonthlyBenefitRun"];
+                };
+            };
+            400: components["responses"]["BatchValidationProblem"];
+            401: components["responses"]["AuthenticationProblem"];
+            403: components["responses"]["BatchAuthorizationProblem"];
+            500: components["responses"]["UnexpectedProblem"];
+            503: components["responses"]["UnavailableProblem"];
+        };
+    };
     inquireSurvivorEntitlement: {
         parameters: {
             query?: never;

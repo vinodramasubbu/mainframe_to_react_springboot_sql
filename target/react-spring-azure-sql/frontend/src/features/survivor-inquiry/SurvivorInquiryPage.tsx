@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { CalendarDays, RotateCcw, Search, ShieldCheck, UserRound } from "lucide-react";
+import { CalendarDays, RotateCcw, Search, UserRound } from "lucide-react";
 import type { SurvivorEntitlement, SurvivorInquiryApi } from "./survivorInquiryApi";
 import { SurvivorApiError } from "./survivorInquiryApi";
 
@@ -54,16 +54,6 @@ export function SurvivorInquiryPage({ api }: Props) {
   }
 
   return (
-    <div className="app-shell">
-      <header className="topbar">
-        <div className="brand-mark" aria-hidden="true">SD</div>
-        <div>
-          <p className="product-name">SURVDEMO</p>
-          <p className="product-area">Benefits operations</p>
-        </div>
-        <div className="security-label"><ShieldCheck size={17} /> Protected inquiry</div>
-      </header>
-
       <main>
         <section className="page-heading" aria-labelledby="page-title">
           <p className="eyebrow">Survivor services / Inquiry</p>
@@ -138,7 +128,6 @@ export function SurvivorInquiryPage({ api }: Props) {
           </section>
         </div>
       </main>
-    </div>
   );
 }
 

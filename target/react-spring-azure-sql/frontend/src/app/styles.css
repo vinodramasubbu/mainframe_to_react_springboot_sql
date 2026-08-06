@@ -26,6 +26,10 @@ button:focus-visible, input:focus-visible, [tabindex="-1"]:focus-visible { outli
 .product-name { font-weight: 700; letter-spacing: 0; }
 .product-area { color: #bcd2d2; font-size: .82rem; }
 .security-label { margin-left: auto; display: flex; align-items: center; gap: 7px; font-size: .84rem; color: #dce9e7; }
+.task-nav { min-height: 54px; padding: 0 clamp(20px, 5vw, 72px); display: flex; align-items: stretch; gap: 2px; background: #fff; border-bottom: 1px solid var(--line); }
+.task-nav button { padding: 0 18px; display: inline-flex; align-items: center; gap: 8px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer; }
+.task-nav button:hover { color: var(--teal); background: #f3f7f5; }
+.task-nav button.active { color: var(--teal); border-bottom-color: var(--teal-bright); }
 
 main { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 42px 0 64px; }
 .page-heading { margin-bottom: 30px; }
@@ -75,13 +79,45 @@ form { padding: 24px 20px; }
 .error-state h3 { font-size: 1.15rem; }
 .error-state p:not(.error-kicker) { margin: 8px 0 0; }
 .retry-note { color: var(--muted); font-size: .85rem; }
+.batch-workspace { grid-template-columns: minmax(280px, .58fr) minmax(560px, 1.42fr); }
+.batch-results .result-content { min-height: 430px; }
+.run-banner { padding: 18px 20px; display: flex; justify-content: space-between; gap: 20px; color: #0a544e; background: #e5f2ed; border-left: 5px solid var(--teal-bright); }
+.run-banner > div { display: flex; align-items: center; gap: 12px; }
+.run-banner span { padding: 4px 7px; color: white; background: var(--teal-bright); border-radius: 3px; font: 500 .76rem "IBM Plex Mono", monospace; }
+.run-banner strong { font-size: .96rem; }
+.run-banner p { margin: 0; color: var(--muted); font: 500 .78rem "IBM Plex Mono", monospace; }
+.run-banner-failed { color: #7d2323; background: #fff0ed; border-left-color: var(--danger); }
+.run-banner-failed span { background: var(--danger); }
+.run-metrics { margin: 0; padding: 14px 20px; display: grid; grid-template-columns: repeat(4, minmax(110px, 1fr)); border-bottom: 1px solid var(--line); }
+.run-metrics > div { padding: 4px 14px; border-right: 1px solid var(--line); }
+.run-metrics > div:first-child { padding-left: 0; }
+.run-metrics > div:last-child { border-right: 0; }
+.run-metrics dt { color: var(--muted); font-size: .73rem; }
+.run-metrics dd { margin: 4px 0 0; font: 500 1.05rem "IBM Plex Mono", monospace; }
+.technical-failure { margin: 16px 20px 0; padding: 14px; display: flex; gap: 10px; color: #7d2323; background: #fff0ed; border: 1px solid #e8b9b2; }
+.technical-failure p { margin: 0; }
+.result-table-section { padding: 18px 20px 4px; overflow-x: auto; }
+.result-table-section + .result-table-section { margin-top: 8px; border-top: 1px solid var(--line); }
+.result-table-section h3 { display: flex; align-items: center; gap: 8px; font-size: .9rem; margin-bottom: 10px; }
+.result-table-section h3 svg { color: var(--teal-bright); }
+.result-table-section table { width: 100%; min-width: 650px; border-collapse: collapse; font-size: .78rem; }
+.result-table-section th { padding: 8px 10px; text-align: left; color: var(--muted); background: #f4f7f6; border-block: 1px solid var(--line); }
+.result-table-section td { padding: 10px; border-bottom: 1px solid #e2e8e6; font-family: "IBM Plex Mono", monospace; }
+.result-table-section td:first-child { font-family: "DM Sans", sans-serif; }
+.result-table-section td small { display: block; margin-top: 3px; color: var(--muted); font: 500 .69rem "IBM Plex Mono", monospace; }
+.table-empty { margin: 0 0 16px; color: var(--muted); font-size: .84rem; }
 
 @media (max-width: 760px) {
   .security-label { font-size: 0; }
   .workspace { grid-template-columns: 1fr; }
+  .batch-workspace { grid-template-columns: 1fr; }
   main { width: min(100% - 24px, 620px); padding-top: 28px; }
   .entitlement dl { grid-template-columns: 1fr; }
   .entitlement .amount { grid-column: 1; }
+  .run-metrics { grid-template-columns: 1fr 1fr; }
+  .run-metrics > div { padding: 9px 12px; border-bottom: 1px solid var(--line); }
+  .run-metrics > div:nth-child(2) { border-right: 0; }
+  .run-banner { flex-direction: column; gap: 7px; }
 }
 @media (max-width: 420px) {
   .topbar { padding-inline: 14px; }
@@ -89,4 +125,6 @@ form { padding: 24px 20px; }
   .actions button { width: 100%; }
   .result-banner { align-items: flex-start; flex-direction: column; }
   .result-banner strong { text-align: left; }
+  .task-nav { padding-inline: 8px; }
+  .task-nav button { flex: 1; justify-content: center; padding-inline: 8px; font-size: .78rem; }
 }

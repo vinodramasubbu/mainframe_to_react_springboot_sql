@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -17,6 +19,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ApiExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiExceptionHandler.class);
+
+        @ExceptionHandler({MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
+        ResponseEntity<ProblemResponse> invalidBatchRequest(Exception exception, HttpServletRequest request) {
+                return problem(HttpStatus.BAD_REQUEST, "Invalid monthly run", "Check the run ID and calculation date",
+                                "SURV-BATCH-VALIDATION", request);
+        }
 
     @ExceptionHandler(InvalidInquiryIdentifierException.class)
     ResponseEntity<ProblemResponse> invalidIdentifier(
