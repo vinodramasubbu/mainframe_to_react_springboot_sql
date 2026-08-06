@@ -2,6 +2,8 @@
 
 Create only artifacts required for the current phase.
 
+Continue the application roadmap in `modernization/plan/`. Every target artifact and work packet must reference its parent node from `phase-dag.json`; update `status.md` with actual execution evidence and expand only the approved slice branch.
+
 ## Modernization evidence
 
 Use:
@@ -32,6 +34,9 @@ modernization/react-spring-azure-sql/
       schema-verification.md
     adrs/
   plans/
+    work-packets/
+      <slice-id>.md
+      <slice-id>-expansion.json
     requirements-traceability.csv
     migration-backlog.csv
     cutover.md
@@ -83,6 +88,9 @@ Create the optional `database/local/` files only when local SQL Server testing i
 ## Work-packet template
 
 ```text
+Roadmap revision:
+Parent DAG node:
+Node status transition:
 Capability/slice:
 Actors and entry points:
 Legacy artifacts and revision:
@@ -101,8 +109,27 @@ Parity mismatches:
 Accessibility/security/operations impact:
 Rollback:
 Risks and assumptions:
-Approvals:
+Approval node ID:
+Accountable role:
+Approver identity:
+Decision: approved | approved-with-conditions | rejected
+Decision timestamp:
+Approved scope/slice:
+Source revision:
+Handoff revision:
+Roadmap revision:
+Conditions and expiry:
+Evidence/reference:
+Next unblocked node:
 ```
+
+Repeat the full approval block for every required target-stage decision. A free-text approval note does not complete an approval node.
+
+`plans/work-packets/<slice-id>-expansion.json` is the approved canonical expansion manifest. Generate child IDs, dependencies, expansion revision, and digest from it using the discovery deliverables contract; do not derive a second graph from prose in the work packet.
+
+## Rollback authority
+
+`plans/rollback.md` is the authoritative versioned rollback plan. DAG rollback nodes reference its exact revision and digest in `requiredInputs`; rollback approvals reference the same revision. The work-packet `Rollback` field and coordinator report only summarize that plan. A revision or digest mismatch blocks validation, cutover readiness, and rollback approval until reconciled.
 
 ## Minimum ADRs
 

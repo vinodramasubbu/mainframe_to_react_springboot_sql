@@ -1,4 +1,5 @@
 ---
+description: "Use for local SQL Server, Testcontainers, backend database integration tests, test profiles, fixtures, migration reset, or Azure SQL-compatible inner-loop testing."
 applyTo: "target/react-spring-azure-sql/database/local/**,target/react-spring-azure-sql/backend/src/test/**,target/react-spring-azure-sql/backend/src/test/resources/**"
 ---
 

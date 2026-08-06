@@ -1,4 +1,5 @@
 ---
+description: "Use for Azure SQL Database schema design, source-to-target mapping, T-SQL, migrations, persistence queries, data migration, compatibility, or database review."
 applyTo: "target/react-spring-azure-sql/database/**,target/react-spring-azure-sql/backend/src/main/resources/db/migration/**"
 ---
 

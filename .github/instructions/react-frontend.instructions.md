@@ -1,4 +1,5 @@
 ---
+description: "Use when designing, implementing, reviewing, or testing the React and TypeScript frontend, browser contracts, accessibility, identity, or UI task flows."
 applyTo: "target/react-spring-azure-sql/frontend/**"
 ---
 

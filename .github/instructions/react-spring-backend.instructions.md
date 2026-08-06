@@ -1,4 +1,5 @@
 ---
+description: "Use when designing, implementing, reviewing, or testing Spring Boot APIs, domain rules, application services, transactions, security, batch, or persistence adapters."
 applyTo: "target/react-spring-azure-sql/backend/**"
 ---
 

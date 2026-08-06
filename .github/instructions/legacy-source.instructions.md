@@ -1,4 +1,5 @@
 ---
+description: "Use when inspecting, extracting, inventorying, citing, or troubleshooting legacy mainframe source evidence. Enforces immutable source and forensic fidelity."
 applyTo: "legacy-source/**"
 ---
 

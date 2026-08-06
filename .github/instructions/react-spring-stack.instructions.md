@@ -1,4 +1,5 @@
 ---
+description: "Use for approved React, Spring Boot, and Azure SQL modernization planning, architecture, implementation, review, validation, coexistence, rollback, or cutover work."
 applyTo: "target/react-spring-azure-sql/**,modernization/react-spring-azure-sql/**"
 ---
 
